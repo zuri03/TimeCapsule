@@ -1,0 +1,37 @@
+TimeCapsule
+
+capsule: a message to be sent out to a destination in the future
+    - capsules can be sent as emails or text messages   
+    - capsules can only include text 
+
+Components/ MVP:
+    client:
+        - a web application 
+        - only has a form for creating and submitting a new capsule
+    API:
+        - accepts forms from clients and inserts a new capsule record in the database
+    Data Layer:
+        - Write Cluster:
+            - contians all of the new capsules
+            - periodically replicates new capsules to read Cluster 
+            - when new capules are submitted to the read cluster they are deleted from the write cluster
+        - Read Cluster:
+            - contains all of the capsules for storage
+            - other components will read from this cluster to process and get details on capsules 
+    Capsule Processing Layer:
+        - processes and executes capsules
+        - capsule processor:
+            - uses the read cluster to determine which capsules are ready to be executed and creates a new event for the executor
+        - capsule executor:
+            - executes the capsule 
+            - can send emails and text messages
+
+Future Plans:
+    - create a mobile app for submitting new capsules
+    - allow users more customization when creating an email capsule such as formatting etc...
+    - add user profiles to allow users to manage their capsules
+
+TODO:
+    - Set up initial project skeleton
+    - workout finer details of implementation
+    - create testing plan
