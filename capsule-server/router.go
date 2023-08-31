@@ -4,19 +4,24 @@ import (
 	"fmt"
 	"net/http"
 	"sync"
+
+	"go.uber.org/zap"
 )
 
 type CapsuleRouter struct {
 	waitgroup *sync.WaitGroup
+	logger    *zap.SugaredLogger
 }
 
 func (router *CapsuleRouter) serveHTTP(writer http.ResponseWriter, request *http.Request) {
 	router.waitgroup.Add(1)
 	defer router.waitgroup.Done()
 
+	router.logger.Info("Method: ", request.Method, "Path: ", request.URL.Path)
+
 	switch request.Method {
 	case http.MethodPost:
-		capsule := ServeHTTPPost(writer, request)
+		capsule := ServeHTTPPost(writer, request, router.logger)
 		if capsule == nil {
 			return
 		}
