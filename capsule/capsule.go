@@ -1,4 +1,4 @@
-package capsuleserver
+package capsule
 
 type Capsule struct {
 	Id     string          `json:"Id"`
