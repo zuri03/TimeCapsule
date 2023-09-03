@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"strings"
 	"sync"
@@ -60,36 +59,23 @@ func (pipeline *RequestPipeline) ParseCapsuleFromRequest(controller *CapsuleCont
 			return
 		}
 
-		metadataFile, header, err := request.FormFile(MetaDataKey)
-		if err != nil {
-			pipeline.logger.Error(fmt.Sprintf("Error fetching form file from request: %s", err))
-			http.Error(writer, "Internal Server Error", http.StatusInternalServerError)
-			return
-		}
-
-		if header.Size > MAX_CONTENT_SIZE {
-			pipeline.logger.Info(fmt.Sprintf("Metadata was %d bytes, request rejected", header.Size))
-			http.Error(writer, "Content too large", http.StatusRequestEntityTooLarge)
-			return
-		}
-
-		metadataBytes, err := ioutil.ReadAll(metadataFile)
-		if err != nil {
-			pipeline.logger.Error(fmt.Sprintf("Error reading bytes from metadata file: %s", err))
-			http.Error(writer, "Internal Server Error", http.StatusInternalServerError)
+		metadata := request.FormValue(MetaDataKey)
+		if metadata == "" {
+			pipeline.logger.Info("Request missing metadata")
+			http.Error(writer, "Missing metadata from request", http.StatusBadRequest)
 			return
 		}
 
 		var capsuleMetaData CapsuleMetaData
-		if err := json.Unmarshal(metadataBytes, &capsuleMetaData); err != nil {
-			pipeline.logger.Error(fmt.Sprintf("Error unmarshalling meta json: %s", err))
-			http.Error(writer, "Internal Server Error", http.StatusInternalServerError)
+		if err := json.Unmarshal([]byte(metadata), &capsuleMetaData); err != nil {
+			pipeline.logger.Info(fmt.Sprintf("Error unmarshalling meta json: %s", err))
+			http.Error(writer, "Unable to marshal request", http.StatusBadRequest)
 			return
 		}
 
-		capsule := &Capsule{Meta: capsuleMetaData}
+		capsule := Capsule{Meta: capsuleMetaData}
 
-		ctx := context.WithValue(request.Context(), CapsuleKey, capsule)
+		ctx := context.WithValue(request.Context(), CapsuleKey, &capsule)
 		request = request.WithContext(ctx)
 
 		controller.ServeHTTP(writer, request)
