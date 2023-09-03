@@ -32,6 +32,6 @@ Future Plans:
     - add user profiles to allow users to manage their capsules
 
 TODO:
-    - Set up initial project skeleton
     - workout finer details of implementation
     - create testing plan
+    - Deterime how to store capsules
