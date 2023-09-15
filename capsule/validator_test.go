@@ -10,6 +10,34 @@ type validatorTestCase struct {
 	expectedValue bool
 }
 
+func BenchmarkEmailValidator(b *testing.B) {
+	emailBechmarkCases := []validatorTestCase{
+		{
+			name:          "Valid email benchmark",
+			input:         "jon@gmail.com",
+			expectedValue: true,
+		},
+		{
+			name:          "Valid email with many characters benchmark",
+			input:         "jon.doe22129327283283sdfsdfsdfasdklklsjls23lsfklasdjfkasdfkjasdflaksdjfklajskddfasfs9293894ggsdfgs4dfgdgfdg@yahoo.com",
+			expectedValue: false,
+		},
+		{
+			name:          "Empty string benchmark",
+			input:         "",
+			expectedValue: false,
+		},
+	}
+
+	for _, emailBenchmarkCase := range emailBechmarkCases {
+		b.Run(emailBenchmarkCase.name, func(b *testing.B) {
+			for i := 0; i < b.N; i++ {
+				emailValidator(emailBenchmarkCase.input)
+			}
+		})
+	}
+}
+
 func TestEmailValidator(t *testing.T) {
 	emailTests := []validatorTestCase{
 		{
