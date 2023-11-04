@@ -10,7 +10,6 @@ var (
 )
 
 //Ensures that all of the value passed into this function is a valid email address
-//Perhaps regex can be used instead if it is faster
 func emailValidator(emails ...string) bool {
 	for _, emailAddress := range emails {
 		if !emailExpression.MatchString(emailAddress) {
